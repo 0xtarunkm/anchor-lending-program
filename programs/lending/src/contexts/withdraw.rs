@@ -1,3 +1,5 @@
+use std::f64::consts::E;
+
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
@@ -57,7 +59,14 @@ impl<'info> Withdraw<'info> {
             deposited_value = self.user.deposited_sol;
         }
 
-        if amount > deposited_value {
+        let time_diff = self.user.last_updated - Clock::get()?.unix_timestamp;
+        self.bank.total_deposit = (self.bank.total_deposit as f64 * E.powf(self.bank.interest_rate as f64 * time_diff as f64)) as u64;
+
+        let value_per_share = self.bank.total_deposit as f64 / self.bank.total_deposit_shares as f64;
+
+        let user_value = (deposited_value as f64 / value_per_share) as u64;
+
+        if user_value < amount {
             return Err(ErrorCode::InsufficientFunds.into());
         }
 

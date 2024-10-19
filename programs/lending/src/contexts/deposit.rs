@@ -87,6 +87,8 @@ impl<'info> Deposit<'info> {
             .checked_add(user_shares)
             .unwrap();
 
+        self.user.last_updated = Clock::get()?.unix_timestamp;
+
         Ok(())
     }
 }

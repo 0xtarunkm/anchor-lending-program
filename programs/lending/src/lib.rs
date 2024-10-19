@@ -35,4 +35,8 @@ pub mod lending {
     pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         ctx.accounts.withdraw(amount)
     }
+
+    pub fn borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
+        ctx.accounts.borrow(amount)
+    }
 }
