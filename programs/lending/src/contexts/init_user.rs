@@ -32,6 +32,7 @@ impl<'info> InitUser<'info> {
             borrowed_usdc_shares: 0,
             mint_usdc: mint_usdc,
             last_updated: 0,
+            last_updated_borrow: 0,
         });
 
         Ok(())

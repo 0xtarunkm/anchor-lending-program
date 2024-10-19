@@ -39,4 +39,8 @@ pub mod lending {
     pub fn borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
         ctx.accounts.borrow(amount)
     }
+
+    pub fn replay(ctx: Context<Repay>, amount: u64) -> Result<()> {
+        ctx.accounts.repay(amount)
+    }
 }
