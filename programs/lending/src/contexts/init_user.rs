@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{User, ANCHOR_DISCRIMINATOR};
+use crate::{User, ANCHOR_DISCRIMINATOR, SEED_USER_ACCOUNT};
 
 #[derive(Accounts)]
 pub struct InitUser<'info> {
@@ -9,7 +9,7 @@ pub struct InitUser<'info> {
     #[account(
         init,
         payer = user,
-        seeds = [b"user", signer.key().as_ref()],
+        seeds = [SEED_USER_ACCOUNT, signer.key().as_ref()],
         bump,
         space = ANCHOR_DISCRIMINATOR + User::INIT_SPACE
     )]
@@ -30,10 +30,10 @@ impl<'info> InitUser<'info> {
             deposited_usdc_shares: 0,
             borrowed_usdc: 0,
             borrowed_usdc_shares: 0,
-            mint_usdc: mint_usdc,
+            mint_usdc,
             last_updated: 0,
             last_updated_borrow: 0,
-            bump: bumps.user
+            bump: bumps.user,
         });
 
         Ok(())

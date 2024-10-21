@@ -6,8 +6,9 @@ use anchor_spl::{
     token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
 };
 
-use crate::error::ErrorCode;
-use crate::{Bank, User};
+use crate::{
+    error::ErrorCode, Bank, User, SEED_BANK_ACCOUNT, SEED_TREASURY_ACCOUNT, SEED_USER_ACCOUNT,
+};
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
@@ -16,13 +17,13 @@ pub struct Withdraw<'info> {
     mint: InterfaceAccount<'info, Mint>,
     #[account(
         mut,
-        seeds = [b"bank".as_ref(), mint.key().as_ref()],
+        seeds = [SEED_BANK_ACCOUNT, mint.key().as_ref()],
         bump = bank.bump,
     )]
     bank: Account<'info, Bank>,
     #[account(
         mut,
-        seeds = [b"treasury".as_ref(), mint.key().as_ref()],
+        seeds = [SEED_TREASURY_ACCOUNT, mint.key().as_ref()],
         bump = bank.treasury_bump,
         token::mint = mint,
         token::authority = treasury,
@@ -31,7 +32,7 @@ pub struct Withdraw<'info> {
     treasury: InterfaceAccount<'info, TokenAccount>,
     #[account(
         mut,
-        seeds = [b"user", signer.key().as_ref()],
+        seeds = [SEED_USER_ACCOUNT, signer.key().as_ref()],
         bump = user.bump,
     )]
     user: Account<'info, User>,
@@ -60,9 +61,12 @@ impl<'info> Withdraw<'info> {
         }
 
         let time_diff = self.user.last_updated - Clock::get()?.unix_timestamp;
-        self.bank.total_deposit = (self.bank.total_deposit as f64 * E.powf(self.bank.interest_rate as f64 * time_diff as f64)) as u64;
+        self.bank.total_deposit = (self.bank.total_deposit as f64
+            * E.powf(self.bank.interest_rate as f64 * time_diff as f64))
+            as u64;
 
-        let value_per_share = self.bank.total_deposit as f64 / self.bank.total_deposit_shares as f64;
+        let value_per_share =
+            self.bank.total_deposit as f64 / self.bank.total_deposit_shares as f64;
 
         let user_value = (deposited_value as f64 / value_per_share) as u64;
 
@@ -78,7 +82,7 @@ impl<'info> Withdraw<'info> {
         };
 
         let seeds = &[
-            &b"treasury"[..],
+            &SEED_TREASURY_ACCOUNT[..],
             &self.bank.mint.as_ref(),
             &[self.bank.treasury_bump],
         ];

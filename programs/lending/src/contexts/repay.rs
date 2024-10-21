@@ -1,7 +1,10 @@
 use std::f64::consts::E;
 
 use anchor_lang::prelude::*;
-use anchor_spl::{associated_token::AssociatedToken, token_interface::{Mint, TokenAccount, TokenInterface, TransferChecked, transfer_checked}};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
+};
 
 use crate::error::ErrorCode;
 
@@ -54,7 +57,7 @@ impl<'info> Repay<'info> {
         match self.mint.to_account_info().key() {
             key if key == self.user.mint_usdc => {
                 borrowed_value = self.user.borrowed_usdc;
-            },
+            }
             _ => {
                 borrowed_value = self.user.borrowed_sol;
             }
@@ -62,9 +65,12 @@ impl<'info> Repay<'info> {
 
         let time_diff = self.user.last_updated_borrow - Clock::get()?.unix_timestamp;
 
-        self.bank.total_borrowed -= (self.bank.total_borrowed as f64 * E.powf(self.bank.interest_rate as f64 * time_diff as f64)) as u64;
-        
-        let value_per_share = self.bank.total_borrowed as f64 / self.bank.total_borrowed_shares as f64;
+        self.bank.total_borrowed -= (self.bank.total_borrowed as f64
+            * E.powf(self.bank.interest_rate as f64 * time_diff as f64))
+            as u64;
+
+        let value_per_share =
+            self.bank.total_borrowed as f64 / self.bank.total_borrowed_shares as f64;
 
         let user_value = borrowed_value / value_per_share as u64;
 
@@ -76,7 +82,7 @@ impl<'info> Repay<'info> {
             from: self.user_ata.to_account_info(),
             mint: self.mint.to_account_info(),
             to: self.treasury.to_account_info(),
-            authority: self.user.to_account_info()
+            authority: self.user.to_account_info(),
         };
 
         let cpi_ctx = CpiContext::new(self.token_program.to_account_info(), cpi_accounts);
@@ -84,13 +90,17 @@ impl<'info> Repay<'info> {
         transfer_checked(cpi_ctx, amount, self.mint.decimals)?;
 
         let borrowed_ratio = amount.checked_div(self.bank.total_borrowed).unwrap();
-        let user_shares = self.bank.total_borrowed.checked_mul(borrowed_ratio).unwrap();
+        let user_shares = self
+            .bank
+            .total_borrowed
+            .checked_mul(borrowed_ratio)
+            .unwrap();
 
         match self.mint.to_account_info().key() {
             key if key == self.user.mint_usdc => {
                 self.user.borrowed_usdc -= amount;
                 self.user.borrowed_usdc_shares -= user_shares;
-            },
+            }
             _ => {
                 self.user.borrowed_sol -= amount;
                 self.user.borrowed_sol_shares -= user_shares;
@@ -99,7 +109,7 @@ impl<'info> Repay<'info> {
 
         self.bank.total_borrowed -= amount;
         self.bank.total_borrowed_shares -= user_shares;
-        
+
         Ok(())
     }
 }

@@ -4,7 +4,7 @@ use anchor_spl::{
     token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
 };
 
-use crate::{Bank, User};
+use crate::{Bank, User, SEED_BANK_ACCOUNT, SEED_TREASURY_ACCOUNT, SEED_USER_ACCOUNT};
 
 #[derive(Accounts)]
 pub struct Deposit<'info> {
@@ -13,13 +13,13 @@ pub struct Deposit<'info> {
     mint: InterfaceAccount<'info, Mint>,
     #[account(
         mut,
-        seeds = [b"bank".as_ref(), mint.key().as_ref()],
+        seeds = [SEED_BANK_ACCOUNT, mint.key().as_ref()],
         bump = bank.bump,
     )]
     bank: Account<'info, Bank>,
     #[account(
         mut,
-        seeds = [b"treasury".as_ref(), mint.key().as_ref()],
+        seeds = [SEED_TREASURY_ACCOUNT, mint.key().as_ref()],
         bump = bank.treasury_bump,
         token::mint = mint,
         token::authority = treasury,
@@ -28,7 +28,7 @@ pub struct Deposit<'info> {
     treasury: InterfaceAccount<'info, TokenAccount>,
     #[account(
         mut,
-        seeds = [b"user", signer.key().as_ref()],
+        seeds = [SEED_USER_ACCOUNT, signer.key().as_ref()],
         bump = user.bump,
     )]
     user: Account<'info, User>,
@@ -88,6 +88,7 @@ impl<'info> Deposit<'info> {
             .unwrap();
 
         self.user.last_updated = Clock::get()?.unix_timestamp;
+        self.bank.last_updated = Clock::get()?.unix_timestamp;
 
         Ok(())
     }

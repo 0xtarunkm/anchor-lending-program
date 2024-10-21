@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
 
-use crate::{Bank, ANCHOR_DISCRIMINATOR};
+use crate::{Bank, ANCHOR_DISCRIMINATOR, SEED_BANK_ACCOUNT, SEED_TREASURY_ACCOUNT};
 
 #[derive(Accounts)]
 pub struct InitBank<'info> {
@@ -11,7 +11,7 @@ pub struct InitBank<'info> {
     #[account(
         init,
         payer = signer,
-        seeds = [b"bank".as_ref(), mint.key().as_ref()],
+        seeds = [SEED_BANK_ACCOUNT, mint.key().as_ref()],
         bump,
         space = ANCHOR_DISCRIMINATOR + Bank::INIT_SPACE
     )]
@@ -19,7 +19,7 @@ pub struct InitBank<'info> {
     #[account(
         init,
         payer = signer,
-        seeds = [b"treasury", mint.key().as_ref()],
+        seeds = [SEED_TREASURY_ACCOUNT, mint.key().as_ref()],
         bump,
         token::mint = mint,
         token::authority = treasury,
