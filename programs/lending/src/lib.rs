@@ -1,9 +1,9 @@
+use anchor_lang::prelude::*;
+
 pub mod constants;
 pub mod contexts;
 pub mod error;
 pub mod states;
-
-use anchor_lang::prelude::*;
 
 pub use constants::*;
 pub use contexts::*;
@@ -25,7 +25,7 @@ pub mod lending {
     }
 
     pub fn init_user(ctx: Context<InitUser>, mint_usdc: Pubkey) -> Result<()> {
-        ctx.accounts.init_user(mint_usdc)
+        ctx.accounts.init_user(mint_usdc, &ctx.bumps)
     }
 
     pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {

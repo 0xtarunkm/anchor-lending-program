@@ -19,7 +19,7 @@ pub struct InitUser<'info> {
 }
 
 impl<'info> InitUser<'info> {
-    pub fn init_user(&mut self, mint_usdc: Pubkey) -> Result<()> {
+    pub fn init_user(&mut self, mint_usdc: Pubkey, bumps: &InitUserBumps) -> Result<()> {
         self.user.set_inner(User {
             owner: self.signer.key(),
             deposited_sol: 0,
@@ -33,6 +33,7 @@ impl<'info> InitUser<'info> {
             mint_usdc: mint_usdc,
             last_updated: 0,
             last_updated_borrow: 0,
+            bump: bumps.user
         });
 
         Ok(())

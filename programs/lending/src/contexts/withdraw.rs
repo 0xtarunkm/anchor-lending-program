@@ -17,13 +17,13 @@ pub struct Withdraw<'info> {
     #[account(
         mut,
         seeds = [b"bank".as_ref(), mint.key().as_ref()],
-        bump,
+        bump = bank.bump,
     )]
     bank: Account<'info, Bank>,
     #[account(
         mut,
         seeds = [b"treasury".as_ref(), mint.key().as_ref()],
-        bump,
+        bump = bank.treasury_bump,
         token::mint = mint,
         token::authority = treasury,
         token::token_program = token_program
@@ -32,7 +32,7 @@ pub struct Withdraw<'info> {
     #[account(
         mut,
         seeds = [b"user", signer.key().as_ref()],
-        bump,
+        bump = user.bump,
     )]
     user: Account<'info, User>,
     #[account(

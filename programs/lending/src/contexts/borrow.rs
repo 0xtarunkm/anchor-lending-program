@@ -17,13 +17,13 @@ pub struct Borrow<'info> {
     #[account(
         mut,
         seeds = [b"bank".as_ref(), mint.key().as_ref()],
-        bump,
+        bump = bank.bump,
     )]
     bank: Account<'info, Bank>,
     #[account(
         mut,
         seeds = [b"treasury".as_ref(), mint.key().as_ref()],
-        bump,
+        bump = bank.treasury_bump,
         token::mint = mint,
         token::authority = treasury,
         token::token_program = token_program
@@ -32,7 +32,7 @@ pub struct Borrow<'info> {
     #[account(
         mut,
         seeds = [b"user", signer.key().as_ref()],
-        bump,
+        bump = user.bump,
     )]
     user: Account<'info, User>,
     #[account(
@@ -59,7 +59,7 @@ impl<'info> Borrow<'info> {
                 let sol_feed_id = get_feed_id_from_hex(SOL_USD_FEED_ID)?;
                 let sol_price = self.price_update.get_price_no_older_than(&Clock::get()?, MAX_AGE, &sol_feed_id)?;
                 let new_value = self.calculate_accrued_interest(self.user.deposited_sol, self.bank.interest_rate, self.user.last_updated)?;
-                total_collateral = sol_price.price as u64 * new_value; 
+                total_collateral = sol_price.price as u64 * new_value;
             },
             _ => {
                 let usdc_feed_id = get_feed_id_from_hex(USDC_USD_FEED_ID)?;
@@ -111,6 +111,8 @@ impl<'info> Borrow<'info> {
                 self.user.borrowed_sol_shares += user_shares;
             }
         }
+
+        self.user.last_updated_borrow = Clock::get()?.unix_timestamp;
 
         Ok(())
     }

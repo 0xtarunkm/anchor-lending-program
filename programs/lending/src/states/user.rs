@@ -15,4 +15,5 @@ pub struct User {
     pub mint_usdc: Pubkey,
     pub last_updated: i64,
     pub last_updated_borrow: i64,
+    pub bump: u8,
 }
